@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Comparer
 {
     static class Configs
     {
-        private static string resultPath;
-        private static string referencePath;
+        private static string resultPath = "";
+        private static string referencePath = "";
         private static int startIndex = 0;
         private static int endIndex = 0;
-        private static int[] ignoreIndex;
+        private static List<int> ignoreIndexes = new List<int>();
         public static string ResultPath 
         {
             get
@@ -47,14 +44,10 @@ namespace Comparer
             }
             set
             {
-                if (value.GetType() != typeof(int))
-                {
-                    throw new Exception("Номер строки должен быть числом.");
-                }
                 startIndex = --value;
             }
         }
-        public static int EndIndex 
+        public static int EndIndex //TODO: autoproperty.
         {
             get
             {
@@ -62,14 +55,28 @@ namespace Comparer
             }
             set
             {
-                if (value.GetType() != typeof(int))
-                {
-                    throw new Exception("Номер строки должен быть числом.");
-                }
-                endIndex = --value;
+                endIndex = value;
             }
         }
-        public static int[] IgnoreIndexes { get; set; } //TODO: -1 to set
+        public static List<int> GetIgnoreIndexes()
+        {
+            return ignoreIndexes;
+        }
+        public static void SetIgnoreIndexes(string value)
+        {
+            string[] tempArray = value.Split(',');
+            List<int> tempList = new List<int>();
+            foreach (string item in tempArray)
+            {
+                if(!int.TryParse(item, out _))
+                {
+                    tempList.Clear();
+                    throw new Exception("Номер строки должен быть числом."); //TODO: или просто проигнорировать? //TODO: НЕ РАБОТАЕТ, ЕСЛИ В КОНЦЕ ИЛИ В НАЧАЛЕ ЕСТЬ ,
+                }
+                tempList.Add(Convert.ToInt32(item) - 1);
+            }
+            ignoreIndexes = new List<int>(tempList);
+        }
         private static bool IsFileLocked(string filename)
         {
             bool Locked = false;

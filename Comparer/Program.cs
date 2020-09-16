@@ -1,11 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Linq.Expressions;
 
 namespace Comparer
 {
@@ -13,58 +9,19 @@ namespace Comparer
     {
         static void Main(string[] args)
         {
+            Stopwatch globalStopwatch = new Stopwatch();
+            globalStopwatch.Start();
             try
             {
                 if (args.Length > 0)
                 {
-                    for (int i = 0; i < args.Length; i++)
-                    {
-                        switch (args[i])
-                        {
-                            case "-result":
-                                ExceptionMaker(ref args, ref i);
-                                Configs.ResultPath = args[++i];
-                                if (++i < args.Length &&
-                                    !args[i].StartsWith("-"))
-                                    {
-                                        Configs.ResultEncoding = args[i];
-                                    }
-                                break;
-                            case "-reference":
-                                ExceptionMaker(ref args, ref i);
-                                Configs.ReferencePath = args[++i];
-                                if (++i < args.Length &&
-                                    !args[i].StartsWith("-"))
-                                {
-                                    Configs.ReferenceEncoding = args[i];
-                                }
-                                break;
-                            case "-init":
-                                ExceptionMaker(ref args, ref i);
-                                Configs.StartIndex = Convert.ToInt32(args[++i]);
-                                break;
-                            case "-end":
-                                ExceptionMaker(ref args, ref i);
-                                Configs.EndIndex = Convert.ToInt32(args[++i]);
-                                break;
-                            case "-ignore":
-                                //TODO: code it
-                                break;
-                            case "-help":
-                                ShowHelp();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    if (args.Contains("-run"))
-                    {
-                        Stopwatch stopwatch = new Stopwatch();
-                        stopwatch.Start();
-                        BeginCompare();
-                        stopwatch.Stop();
-                        Console.WriteLine($"Потрачено времени (миллисекунд): {stopwatch.ElapsedMilliseconds}.");
-                    }
+                    ReadArgs(args);
+                    //WRONG! At least two path. Try do following: try read 2 firs args as 2 file path, if path1 and path2 != "" then BeginCompare
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    BeginCompare();
+                    stopwatch.Stop();
+                    Console.WriteLine($"Потрачено времени (миллисекунд): {stopwatch.ElapsedMilliseconds}.");
                 }
                 else
                 {
@@ -75,7 +32,12 @@ namespace Comparer
             {
                 Console.WriteLine(e.Message);
             }
-            Console.ReadKey();
+            finally
+            {
+                globalStopwatch.Stop();
+                Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
+                Console.ReadKey();
+            }
         }
 
         private static void ShowHelp()
@@ -85,18 +47,35 @@ namespace Comparer
 
         private static void BeginCompare()
         {
-            //TODO: some code.
-            string[] resultArray = File.ReadAllLines(Configs.ResultPath);
-            string[] referenceArray = File.ReadAllLines(Configs.ReferencePath);
-            int compareLength = resultArray.Length > referenceArray.Length ? referenceArray.Length : resultArray.Length;
-            Configs.EndIndex = Configs.EndIndex != 0 && compareLength > Configs.EndIndex ? Configs.EndIndex : compareLength;
+            string[] resultArray = File.ReadAllLines(Configs.ResultPath, Encoding.Default);
+            string[] referenceArray = File.ReadAllLines(Configs.ReferencePath, Encoding.Default);
+            int shortestLengs = resultArray.Length > referenceArray.Length ? referenceArray.Length : resultArray.Length;
+            Configs.EndIndex = Configs.EndIndex != 0 && shortestLengs > Configs.EndIndex ? Configs.EndIndex : shortestLengs;
+            if (Configs.StartIndex > Configs.EndIndex)
+            {
+                throw new Exception("Значение нижней границы диапазона поиска больше значения верхней границы диапазона.");
+            }
             int discrepancyIndex = -1;
             for (int i = Configs.StartIndex; i < Configs.EndIndex; i++)
             {
-                if (!resultArray[i].Equals(referenceArray[i]))
+                if (Configs.GetIgnoreIndexes().Contains(i))
                 {
-                    discrepancyIndex = i;
-                    break;
+                    continue;
+                }
+                if (!resultArray[i].Equals(referenceArray[i])) 
+                {
+                    if (resultArray[i].Equals("*") || referenceArray[i].Equals("*"))
+                    {
+                        continue;
+                    } else if (resultArray[i].Contains("*") || referenceArray[i].Contains("*")) //TODO: ULTRAPRIORITY!!!! MAKE IT WORK WITH *
+                    {
+                        //CODE IT!
+                    }
+                    else
+                    {
+                        discrepancyIndex = i;
+                        break;
+                    }
                 }
             }
             if (discrepancyIndex.Equals(-1))
@@ -108,18 +87,64 @@ namespace Comparer
                 $"Эталон: \t{ referenceArray[discrepancyIndex]}\nРезультат: \t{ resultArray[discrepancyIndex]}");
         }
 
-        private static void ExceptionMaker(ref string[] array, ref int index)
+        private static string ArgumentTaker(ref string[] args, ref int i)
         {
-            if (index + 1 >= array.Length)
+            if (i + 1 >= args.Length)
             {
-                throw new Exception($"Отсутствуют аргументы параметра {array[index]}.");
+                throw new Exception($"Отсутствуют аргументы параметра {args[i]}.");
             }
-            if (array[index].Equals("-init") ||
-                array[index].Equals("-end"))
+            if (args[i].Equals("-init") ||
+                args[i].Equals("-end"))
             {
-                if (array[++index].GetType() != typeof(int))
+                if (!int.TryParse(args[i + 1], out _))
                 {
                     throw new Exception("Номер строки должен быть числом.");
+                }
+            }
+            if (args[i].Equals("-ignore"))
+            {
+                args[i + 1] = args[i + 1].Replace(" ", "");
+                args[i + 1] = args[i + 1].Trim(',');
+            }
+            return args[++i];
+        }
+
+        private static void ReadArgs(string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "-result":
+                        Configs.ResultPath = ArgumentTaker(ref args, ref i);
+                        if (i + 1 < args.Length &&
+                            !args[i + 1].StartsWith("-"))
+                        {
+                            Configs.ResultEncoding = args[++i];
+                        }
+                        break;
+                    case "-reference":
+                        Configs.ReferencePath = ArgumentTaker(ref args, ref i);
+                        if (i + 1 < args.Length &&
+                            !args[i + 1].StartsWith("-"))
+                        {
+                            Configs.ReferenceEncoding = args[++i];
+                        }
+                        break;
+                    case "-init":
+                        Configs.StartIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
+                        break;
+                    case "-end":
+                        Configs.EndIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
+                        break;
+                    case "-ignore":
+                        Configs.SetIgnoreIndexes(ArgumentTaker(ref args, ref i));
+                        break;
+                    case "-help":
+                        ShowHelp();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
