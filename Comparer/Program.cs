@@ -64,12 +64,9 @@ namespace Comparer
                 }
                 if (!resultArray[i].Equals(referenceArray[i])) 
                 {
-                    if (resultArray[i].Equals("*") || referenceArray[i].Equals("*"))
-                    {
+                    if (isMaskCovered(resultArray[i], referenceArray[i])) //TODO: ULTRAPRIORITY!!!! MAKE IT WORK WITH *
+                    {                        
                         continue;
-                    } else if (resultArray[i].Contains("*") || referenceArray[i].Contains("*")) //TODO: ULTRAPRIORITY!!!! MAKE IT WORK WITH *
-                    {
-                        //CODE IT!
                     }
                     else
                     {
@@ -98,7 +95,7 @@ namespace Comparer
             {
                 if (!int.TryParse(args[i + 1], out _))
                 {
-                    throw new Exception("Номер строки должен быть числом.");
+                    throw new Exception($"{args[i]}: номер строки должен быть числом.");
                 }
             }
             if (args[i].Equals("-ignore"))
@@ -147,6 +144,34 @@ namespace Comparer
                         break;
                 }
             }
+        }
+
+        private static bool isMaskCovered(string firstValue, string secondValue)
+        {
+            if (firstValue.Equals("*") || secondValue.Equals("*"))
+            {
+                return true;
+            }
+            bool condition = false;
+            if(firstValue.Contains("*") || secondValue.Contains("*"))
+            {                
+                string maskedValue = firstValue.Contains("*") ? firstValue : secondValue;
+                string clearValue = secondValue.Contains("*") ? firstValue : secondValue;
+                string[] maskedArray = maskedValue.Split('*');
+                maskedValue = maskedValue.Replace("*", "");
+                string unmaskedValue = "";
+                for (int i = 0; i < maskedArray.Length; i++)
+                {
+                    if (clearValue.Contains(maskedArray[i]))
+                    {
+                        int matchIndex = clearValue.IndexOf(maskedArray[i]);
+                        unmaskedValue += clearValue.Substring(matchIndex, maskedArray[i].Length);
+                        clearValue = clearValue.Substring(matchIndex + maskedArray[i].Length);
+                    }
+                }
+                condition = maskedValue.Equals(unmaskedValue);
+            }
+            return condition;
         }
     }
 }

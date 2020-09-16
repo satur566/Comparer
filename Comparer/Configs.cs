@@ -9,7 +9,6 @@ namespace Comparer
         private static string resultPath = "";
         private static string referencePath = "";
         private static int startIndex = 0;
-        private static int endIndex = 0;
         private static List<int> ignoreIndexes = new List<int>();
         public static string ResultPath 
         {
@@ -19,7 +18,7 @@ namespace Comparer
             }
             set
             {
-                CheckFileAvailability(value); //TODO: check this!
+                CheckFileAvailability(value);
                 resultPath = value;
             }
         }
@@ -34,7 +33,7 @@ namespace Comparer
                 CheckFileAvailability(value);
                 referencePath = value;
             }
-        } //TODO: some tryCatch
+        }
         public static string ReferenceEncoding { get; set; } //TODO: descript what encoding we get
         public static int StartIndex
         {
@@ -47,17 +46,7 @@ namespace Comparer
                 startIndex = --value;
             }
         }
-        public static int EndIndex //TODO: autoproperty.
-        {
-            get
-            {
-                return endIndex;
-            }
-            set
-            {
-                endIndex = value;
-            }
-        }
+        public static int EndIndex { get; set; } = 0;
         public static List<int> GetIgnoreIndexes()
         {
             return ignoreIndexes;
@@ -66,14 +55,14 @@ namespace Comparer
         {
             string[] tempArray = value.Split(',');
             List<int> tempList = new List<int>();
-            foreach (string item in tempArray)
+            for (int i = 0; i < tempArray.Length; i++)            
             {
-                if(!int.TryParse(item, out _))
+                if(!int.TryParse(tempArray[i], out _))
                 {
                     tempList.Clear();
-                    throw new Exception("Номер строки должен быть числом."); //TODO: или просто проигнорировать? //TODO: НЕ РАБОТАЕТ, ЕСЛИ В КОНЦЕ ИЛИ В НАЧАЛЕ ЕСТЬ ,
+                    throw new Exception($"-ignore: номер строки на позиции {i + 1} должен быть числом."); //TODO: -ignore: номер строки на позиции (i + 1)
                 }
-                tempList.Add(Convert.ToInt32(item) - 1);
+                tempList.Add(Convert.ToInt32(tempArray[i]) - 1);
             }
             ignoreIndexes = new List<int>(tempList);
         }
