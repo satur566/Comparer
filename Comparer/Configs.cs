@@ -60,7 +60,7 @@ namespace Comparer
                 if(!int.TryParse(tempArray[i], out _))
                 {
                     tempList.Clear();
-                    throw new Exception($"-ignore: номер строки на позиции {i + 1} должен быть числом."); //TODO: -ignore: номер строки на позиции (i + 1)
+                    throw new Exception($"-ignore: номер строки на позиции {i + 1} должен быть числом.");
                 }
                 tempList.Add(Convert.ToInt32(tempArray[i]) - 1);
             }
