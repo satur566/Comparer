@@ -7,46 +7,82 @@ namespace Comparer
 {
     class Comparing
     {
-        private int StartIndex { get; set; }
-        public static int EndIndex { get; set; }
-        private List<int> IgnoreIndexes { get; set; }
-        private string[] ResultArray { get; set; }
-        private string[] ReferenceArray { get; set; }
-
-        public Comparing(string firstValue, string secondValue, int beginsWith, int endsWith, List<int> ignoreItems)
+        private int StartIndex { get; set; } = 0;
+        public static int EndIndex { get; set; } = 0;
+        private List<int> IgnoreIndexes { get; set; } = new List<int>();
+        public Comparing() { }
+        public Comparing(int beginsWith, int endsWith, List<int> ignoreItems)
         {
-            ResultArray = File.ReadAllLines(firstValue, GetEncoding(firstValue));
-            ReferenceArray = File.ReadAllLines(secondValue, GetEncoding(secondValue));
             StartIndex = beginsWith;
             EndIndex = endsWith;
             IgnoreIndexes = new List<int>(ignoreItems);
         }
 
-        public string Compare() //STREAMREADER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        /// <summary>
+        /// Определяет наиболее короткий по количеству строк файл.
+        /// </summary>
+        /// <param name="firstPath">Путь к файлу.</param>
+        /// <param name="secondPath">Путь к файлу.</param>
+        /// <returns>Возвращает количество строк наиболее короткого файла.</returns>
+        private int ShortestLength (string firstPath, string secondPath)
         {
-            int shortestLengs = ResultArray.Length > ReferenceArray.Length ? ReferenceArray.Length : ResultArray.Length;
-            EndIndex = EndIndex != 0 && shortestLengs > EndIndex ? EndIndex : shortestLengs;
+            int count = 0;
+            using (StreamReader firstStream = new StreamReader(firstPath))
+            using (StreamReader secondStream = new StreamReader(secondPath))
+            {
+                while (true)
+                {
+                    if (firstStream.ReadLine() == null || secondStream.ReadLine() == null)
+                    {
+                        break;
+                    }
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Сравнивает два файла между собой до первого различия.
+        /// </summary>
+        /// <returns>Возвращает строку, содержвщую информацию о различиях в файле.</returns>
+        public string Compare() //Переделать на два out.
+        {
+            string firstPath = Configs.ResultPath;
+            string secondPath = Configs.ReferencePath;
+            int discrepancyIndex = -1;
+            string unmatchedResultString = "";
+            string unmatchedReferenceString = "";
+            int shortestLength = ShortestLength(firstPath, secondPath);
+            EndIndex = EndIndex != 0 && shortestLength > EndIndex ? EndIndex : shortestLength;
             if (StartIndex > EndIndex)
             {
                 throw new Exception("Значение нижней границы диапазона поиска больше значения верхней границы диапазона поиска.");
             }
-            int discrepancyIndex = -1;
-            for (int i = StartIndex; i < EndIndex; i++)
+            using (StreamReader firstStream = new StreamReader(firstPath, GetEncoding(firstPath)))
+            using (StreamReader secondStream = new StreamReader(secondPath, GetEncoding(secondPath)))
             {
-                if (IgnoreIndexes.Contains(i))
+                for (int i = 0; i < EndIndex; i++)
                 {
-                    continue;
-                }
-                if (!ResultArray[i].Equals(ReferenceArray[i]))
-                {
-                    if (IsMaskCovered(ResultArray[i], ReferenceArray[i]))
+                    string resultString = firstStream.ReadLine();
+                    string referenceString = secondStream.ReadLine();
+                    if (i < StartIndex || IgnoreIndexes.Contains(i))
                     {
                         continue;
                     }
-                    else
+                    if (!resultString.Equals(referenceString))
                     {
-                        discrepancyIndex = i;
-                        break;
+                        if (IsMaskCovered(resultString, referenceString))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            discrepancyIndex = i;
+                            unmatchedResultString = resultString;
+                            unmatchedReferenceString = referenceString;
+                            break;
+                        }
                     }
                 }
             }
@@ -55,9 +91,15 @@ namespace Comparer
                 return "Содержимое файлов идентично.";
             }
             return $"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +
-                $"Эталон: \t{ ReferenceArray[discrepancyIndex]}\nРезультат: \t{ ResultArray[discrepancyIndex]}";
+                $"Эталон: \t{unmatchedResultString}\nРезультат: \t{unmatchedReferenceString}";
         }
 
+        /// <summary>
+        /// Сравнивает две строки, любая из которых содержит маску *.
+        /// </summary>
+        /// <param name="firstValue">Строковое значение.</param>
+        /// <param name="secondValue">Строковое значение.</param>
+        /// <returns>Возвращает true, если строки совпадают с учетом маски. В противном случае - false.</returns>
         private static bool IsMaskCovered(string firstValue, string secondValue)
         {
             if (firstValue.Equals("*") || secondValue.Equals("*"))
@@ -107,7 +149,7 @@ namespace Comparer
         /// </summary>
         /// <param name="filename">The text file to analyze.</param>
         /// <returns>The detected encoding.</returns>
-        private static Encoding GetEncoding(string filename) //Use this: https://stackoverflow.com/questions/3825390/effective-way-to-find-any-files-encoding
+        private static Encoding GetEncoding(string filename) //Used this: https://stackoverflow.com/questions/3825390/effective-way-to-find-any-files-encoding
         {
             // Read the BOM
             var bom = new byte[4];

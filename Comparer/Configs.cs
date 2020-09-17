@@ -8,7 +8,6 @@ namespace Comparer
     {
         private static string resultPath = "";
         private static string referencePath = "";
-        private static int startIndex = 0;
         private static List<int> ignoreIndexes = new List<int>();
         public static bool IsDetailed { get; set; } = false;
         public static string ResultPath 
@@ -18,9 +17,8 @@ namespace Comparer
                 return resultPath;
             }
             set
-            {
-                CheckFileAvailability(value);
-                resultPath = value;
+            {               
+                resultPath = CheckFileAvailability(value);
             }
         }
         public static string ReferencePath {
@@ -30,21 +28,10 @@ namespace Comparer
             }
             set
             {
-                CheckFileAvailability(value);
-                referencePath = value;
+                referencePath = CheckFileAvailability(value);
             }
         }
-        public static int StartIndex
-        {
-            get
-            {
-                return startIndex;
-            }
-            set
-            {
-                startIndex = --value;
-            }
-        }
+        public static int StartIndex { get; set; } = 0;
         public static int EndIndex { get; set; } = 0;
         public static List<int> GetIgnoreIndexes()
         {
@@ -65,6 +52,11 @@ namespace Comparer
             }
             ignoreIndexes = new List<int>(tempList);
         }
+        /// <summary>
+        /// Проверяет использование файла другим процессом.
+        /// </summary>
+        /// <param name="filename">Полное имя файла.</param>
+        /// <returns>Возвращает true, если файл заблокирован другим процессом. В противном случае возвращает false.</returns>
         private static bool IsFileLocked(string filename)
         {
             bool Locked = false;
@@ -81,7 +73,11 @@ namespace Comparer
             }
             return Locked;
         }
-        private static void CheckFileAvailability(string path)
+        /// <summary>
+        /// Проверяет доступность и наличие файла.
+        /// </summary>
+        /// <param name="path">Полное имя файла.</param>
+        private static string CheckFileAvailability(string path)
         {
             if (!File.Exists(path))
             {
@@ -91,6 +87,7 @@ namespace Comparer
             {
                 throw new Exception($"Файл {path} занят другим процессом.");
             }
+            return path;
         }
     }
 }
