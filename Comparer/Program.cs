@@ -11,6 +11,11 @@ namespace Comparer
             globalStopwatch.Start();
             try
             {
+                if (args.Equals(null) || args.Length <= 0)
+                {
+                    Console.WriteLine("Недостаточно данных для работы программы.\n");
+                    ShowHelp();
+                }
                 if (args.Length > 1)
                 {
                     string firstValue = "";
@@ -35,19 +40,14 @@ namespace Comparer
                     {
                         Console.WriteLine($"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +
                             $"Эталон: \t{firstValue}\nРезультат: \t{secondValue}");
-                    } else
+                    }
+                    else
                     {
                         Console.WriteLine("Файлы идентичны.");
                     }
                 }
-
                 if (args[0] == "-help")
                 {
-                    ShowHelp();
-                }                   
-                else if (args.Length <= 1)
-                {
-                    Console.WriteLine("Недостаточно данных для работы программы.\n");
                     ShowHelp();
                 }
             }
@@ -63,6 +63,7 @@ namespace Comparer
                     Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
                 }
             }
+            Console.ReadKey();
         }
         /// <summary>
         /// Выводит подскизку по использованию консольного приложения.
@@ -137,7 +138,7 @@ namespace Comparer
                         break;
                     case "-ignore":
                         Configs.SetIgnoreIndexes(ArgumentTaker(ref args, ref i));
-                        break;                    
+                        break;
                     default:
                         throw new Exception($"Неизвестный параметр: {args[i]}");
                 }
