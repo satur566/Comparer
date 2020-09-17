@@ -11,12 +11,19 @@ namespace Comparer
             globalStopwatch.Start();
             try
             {
-                if (args.Equals(null) || args.Length <= 0)
+                if (args.Equals(null) || args.Length <= 1)
                 {
-                    Console.WriteLine("Недостаточно данных для работы программы.\n");
-                    ShowHelp();
+                    if (!args.Equals(null) && args[0] == "-help")
+                    {
+                        ShowHelp();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Недостаточно данных для работы программы.\n");
+                        ShowHelp();
+                    }
                 }
-                if (args.Length > 1)
+                else
                 {
                     string firstValue = "";
                     string secondValue = "";
@@ -45,11 +52,7 @@ namespace Comparer
                     {
                         Console.WriteLine("Файлы идентичны.");
                     }
-                }
-                if (args[0] == "-help")
-                {
-                    ShowHelp();
-                }
+                }                
             }
             catch (Exception e)
             {
@@ -63,6 +66,7 @@ namespace Comparer
                     Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
                 }
             }
+            Console.ReadKey();
         }
         /// <summary>
         /// Выводит подскизку по использованию консольного приложения.
