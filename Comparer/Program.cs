@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace Comparer
 {
@@ -13,22 +11,41 @@ namespace Comparer
             globalStopwatch.Start();
             try
             {
-                if (args.Length == 2)
+                if (args.Length > 1)
                 {
-                    Configs.ResultPath = args[0];
-                    Configs.ReferencePath = args[1];
-                    Comparing defaultComparer = new Comparing();
-                    Console.WriteLine(defaultComparer.Compare());
+                    string firstValue = "";
+                    string secondValue = "";
+                    int discrepancyIndex = -1;
+                    if (args.Length == 2)
+                    {
+                        Configs.ResultPath = args[0];
+                        Configs.ReferencePath = args[1];
+                        Comparing defaultComparer = new Comparing();
+                        discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
+                    }
+                    if (args.Length > 2)
+                    {
+                        Configs.ResultPath = args[0];
+                        Configs.ReferencePath = args[1];
+                        ReadArgs(args);
+                        Comparing argsComparer = new Comparing(Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());
+                        discrepancyIndex = argsComparer.Compare(out firstValue, out secondValue);
+                    }
+                    if (discrepancyIndex > 0)
+                    {
+                        Console.WriteLine($"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +
+                            $"Эталон: \t{firstValue}\nРезультат: \t{secondValue}");
+                    } else
+                    {
+                        Console.WriteLine("Файлы идентичны.");
+                    }
                 }
-                if (args.Length > 2)
+
+                if (args[0] == "-help")
                 {
-                    Configs.ResultPath = args[0];
-                    Configs.ReferencePath = args[1];
-                    ReadArgs(args);
-                    Comparing argsComparer = new Comparing(Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());                    
-                    Console.WriteLine(argsComparer.Compare());
-                }
-                if (args.Length <= 1)
+                    ShowHelp();
+                }                   
+                else if (args.Length <= 1)
                 {
                     Console.WriteLine("Недостаточно данных для работы программы.\n");
                     ShowHelp();
@@ -67,7 +84,7 @@ namespace Comparer
         }
 
         /// <summary>
-        /// Проверяет корректность применяемого к параметру аргумента.
+        /// Проверяет корректность значения аргумента.
         /// </summary>
         /// <param name="args">Массив аргументов.</param>
         /// <param name="i">Индекс массива.</param>
@@ -117,8 +134,6 @@ namespace Comparer
                         Configs.EndIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
                         break;
                     case "-help":
-                    case "/?":
-                    case "-?":
                         ShowHelp();
                         break;
                     case "-ignore":

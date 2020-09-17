@@ -27,17 +27,24 @@ namespace Comparer
         private int ShortestLength (string firstPath, string secondPath)
         {
             int count = 0;
-            using (StreamReader firstStream = new StreamReader(firstPath))
-            using (StreamReader secondStream = new StreamReader(secondPath))
+            try
             {
-                while (true)
+                using (StreamReader firstStream = new StreamReader(firstPath))
+                using (StreamReader secondStream = new StreamReader(secondPath))
                 {
-                    if (firstStream.ReadLine() == null || secondStream.ReadLine() == null)
+                    while (true)
                     {
-                        break;
+                        if (firstStream.ReadLine() == null || secondStream.ReadLine() == null)
+                        {
+                            break;
+                        }
+                        count++;
                     }
-                    count++;
                 }
+            }
+            catch
+            {
+                throw new Exception("Невозможно сравнить файлы. Процесс чтения был прерван.");
             }
             return count;
         }
@@ -45,8 +52,10 @@ namespace Comparer
         /// <summary>
         /// Сравнивает два файла между собой до первого различия.
         /// </summary>
-        /// <returns>Возвращает строку, содержвщую информацию о различиях в файле.</returns>
-        public string Compare() //Переделать на два out.
+        /// <param name="firstUnmatchedValue">Строка из первого файла с отличием.</param>
+        /// <param name="secondUnmatchedValue">Строка из второго файла с отличием.</param>
+        /// <returns>Возвращает -1 в случае, если различий не обнаружено. В противном случае возвращает номер строки, на которой обнаружилось первое отличие.</returns>
+        public int Compare(out string firstUnmatchedValue, out string secondUnmatchedValue)
         {
             string firstPath = Configs.ResultPath;
             string secondPath = Configs.ReferencePath;
@@ -59,39 +68,49 @@ namespace Comparer
             {
                 throw new Exception("Значение нижней границы диапазона поиска больше значения верхней границы диапазона поиска.");
             }
-            using (StreamReader firstStream = new StreamReader(firstPath, GetEncoding(firstPath)))
-            using (StreamReader secondStream = new StreamReader(secondPath, GetEncoding(secondPath)))
+            try
             {
-                for (int i = 0; i < EndIndex; i++)
+                using (StreamReader firstStream = new StreamReader(firstPath, GetEncoding(firstPath)))
+                using (StreamReader secondStream = new StreamReader(secondPath, GetEncoding(secondPath)))
                 {
-                    string resultString = firstStream.ReadLine();
-                    string referenceString = secondStream.ReadLine();
-                    if (i < StartIndex || IgnoreIndexes.Contains(i))
+                    for (int i = 0; i < EndIndex; i++)
                     {
-                        continue;
-                    }
-                    if (!resultString.Equals(referenceString))
-                    {
-                        if (IsMaskCovered(resultString, referenceString))
+                        string resultString = firstStream.ReadLine();
+                        string referenceString = secondStream.ReadLine();
+                        if (i < StartIndex || IgnoreIndexes.Contains(i))
                         {
                             continue;
                         }
-                        else
+                        if (!resultString.Equals(referenceString))
                         {
-                            discrepancyIndex = i;
-                            unmatchedResultString = resultString;
-                            unmatchedReferenceString = referenceString;
-                            break;
+                            if (IsMaskCovered(resultString, referenceString))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                discrepancyIndex = i;
+                                unmatchedResultString = resultString;
+                                unmatchedReferenceString = referenceString;
+                                break;
+                            }
                         }
                     }
                 }
             }
+            catch
+            {
+                throw new Exception("Невозможно сравнить файлы. Процесс чтения был прерван.");
+            }
             if (discrepancyIndex.Equals(-1))
             {
-                return "Содержимое файлов идентично.";
+                firstUnmatchedValue = "";
+                secondUnmatchedValue = "";
+                return discrepancyIndex;
             }
-            return $"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +
-                $"Эталон: \t{unmatchedResultString}\nРезультат: \t{unmatchedReferenceString}";
+            firstUnmatchedValue = unmatchedResultString;
+            secondUnmatchedValue = unmatchedReferenceString;
+            return discrepancyIndex;
         }
 
         /// <summary>
