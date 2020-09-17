@@ -10,6 +10,7 @@ namespace Comparer
         private static string referencePath = "";
         private static int startIndex = 0;
         private static List<int> ignoreIndexes = new List<int>();
+        public static bool IsDetailed { get; set; } = false;
         public static string ResultPath 
         {
             get
@@ -22,7 +23,6 @@ namespace Comparer
                 resultPath = value;
             }
         }
-        public static string ResultEncoding { get; set; } //TODO: descript what encoding we get
         public static string ReferencePath {
             get
             {
@@ -34,7 +34,6 @@ namespace Comparer
                 referencePath = value;
             }
         }
-        public static string ReferenceEncoding { get; set; } //TODO: descript what encoding we get
         public static int StartIndex
         {
             get

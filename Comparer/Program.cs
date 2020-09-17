@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Comparer
 {
@@ -16,12 +18,8 @@ namespace Comparer
                     Configs.ResultPath = args[0];
                     Configs.ReferencePath = args[1];
                     ReadArgs(args);
-                    Stopwatch stopwatch = new Stopwatch();
-                    Comparing comparer = new Comparing(Configs.ResultPath, Configs.ReferencePath, Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());
-                    stopwatch.Start();
+                    Comparing comparer = new Comparing(Configs.ResultPath, Configs.ReferencePath, Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());                    
                     Console.WriteLine(comparer.Compare());
-                    stopwatch.Stop();
-                    Console.WriteLine($"Потрачено времени (миллисекунд): {stopwatch.ElapsedMilliseconds}.");
                 }
                 else
                 {
@@ -35,7 +33,10 @@ namespace Comparer
             finally
             {
                 globalStopwatch.Stop();
-                Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
+                if (Configs.IsDetailed)
+                {
+                    Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
+                }
                 Console.ReadKey();
             }
         }
@@ -76,15 +77,18 @@ namespace Comparer
                     case "-begin":
                         Configs.StartIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
                         break;
+                    case "-detailed":
+                        Configs.IsDetailed = true;
+                        break;
                     case "-end":
                         Configs.EndIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
-                        break;
-                    case "-ignore":
-                        Configs.SetIgnoreIndexes(ArgumentTaker(ref args, ref i));
                         break;
                     case "-help":
                         ShowHelp();
                         break;
+                    case "-ignore":
+                        Configs.SetIgnoreIndexes(ArgumentTaker(ref args, ref i));
+                        break;                    
                     default:
                         break;
                 }
