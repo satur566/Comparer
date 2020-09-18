@@ -96,17 +96,15 @@ namespace Comparer
                             }
                         }
                     }
-                    try
+                    if (EndIndex == shortestLength)
                     {
                         unmatchedResultString = firstStream.ReadLine();
-                        discrepancyIndex = EndIndex;
-                    } catch { }
-                    try
-                    {
                         unmatchedReferenceString = secondStream.ReadLine();
-                        discrepancyIndex = EndIndex;
-                    }
-                    catch { }
+                        if (unmatchedResultString != null || unmatchedReferenceString != null)
+                        {
+                            discrepancyIndex = EndIndex;
+                        }
+                    }                            
                 }
             }
             catch
