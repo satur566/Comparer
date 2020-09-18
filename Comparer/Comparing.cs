@@ -90,12 +90,23 @@ namespace Comparer
                             else
                             {
                                 discrepancyIndex = i;
-                                unmatchedResultString = resultString;
-                                unmatchedReferenceString = referenceString;
-                                break;
+                                firstUnmatchedValue = resultString;
+                                secondUnmatchedValue = referenceString;
+                                return discrepancyIndex;
                             }
                         }
                     }
+                    try
+                    {
+                        unmatchedResultString = firstStream.ReadLine();
+                        discrepancyIndex = EndIndex;
+                    } catch { }
+                    try
+                    {
+                        unmatchedReferenceString = secondStream.ReadLine();
+                        discrepancyIndex = EndIndex;
+                    }
+                    catch { }
                 }
             }
             catch
