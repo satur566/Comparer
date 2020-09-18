@@ -35,7 +35,7 @@ namespace Comparer
                         Comparing defaultComparer = new Comparing();
                         discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
                     }
-                    if (args.Length > 2)
+                    else
                     {
                         Configs.ResultPath = args[0];
                         Configs.ReferencePath = args[1];
