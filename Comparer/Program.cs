@@ -66,7 +66,6 @@ namespace Comparer
                     Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
                 }
             }
-            Console.ReadKey();
         }
         /// <summary>
         /// Выводит подскизку по использованию консольного приложения.
