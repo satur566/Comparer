@@ -5,6 +5,5 @@
 01.09.2020 21:49:34 - Reading html: SUCCESS.
 01.09.2020 21:49:38 - Sending message to satur566@gmail.com: FAILURE.
 *
-
-
-Current user: nimda
+ 
+1

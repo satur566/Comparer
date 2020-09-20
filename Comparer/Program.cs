@@ -86,37 +86,6 @@ namespace Comparer
         }
 
         /// <summary>
-        /// Проверяет корректность значения аргумента.
-        /// </summary>
-        /// <param name="args">Массив аргументов.</param>
-        /// <param name="i">Индекс массива.</param>
-        /// <returns>Возвращает значение аргумента.</returns>
-        private static string ArgumentTaker(ref string[] args, ref int i)
-        {
-            if (i + 1 >= args.Length)
-            {
-                throw new Exception($"Отсутствуют аргументы параметра {args[i]}.");
-            }
-            switch (args[i])
-            {
-                case "-begin":
-                case "-end":
-                    if (!int.TryParse(args[i + 1], out _))
-                    {
-                        throw new Exception($"{args[i]}: номер строки должен быть числом.");
-                    }
-                    break;
-                case "-ignore":
-                    args[i + 1] = args[i + 1].Replace(" ", "");
-                    args[i + 1] = args[i + 1].Trim(',');
-                    break;
-                default:
-                    break;
-            }
-            return args[++i];
-        }
-
-        /// <summary>
         /// Считывает аргументы, подаваемые на вход приложению.
         /// </summary>
         /// <param name="args">Массив аргуиентов.</param>
@@ -146,5 +115,36 @@ namespace Comparer
                 }
             }
         }
+
+        /// <summary>
+        /// Проверяет корректность значения аргумента.
+        /// </summary>
+        /// <param name="args">Массив аргументов.</param>
+        /// <param name="i">Индекс массива.</param>
+        /// <returns>Возвращает значение аргумента.</returns>
+        private static string ArgumentTaker(ref string[] args, ref int i)
+        {
+            if (i + 1 >= args.Length)
+            {
+                throw new Exception($"Отсутствуют аргументы параметра {args[i]}.");
+            }
+            switch (args[i])
+            {
+                case "-begin":
+                case "-end":
+                    if (!int.TryParse(args[i + 1], out _))
+                    {
+                        throw new Exception($"{args[i]}: номер строки должен быть числом.");
+                    }
+                    break;
+                case "-ignore":
+                    args[i + 1] = args[i + 1].Replace(" ", "");
+                    args[i + 1] = args[i + 1].Trim(',');
+                    break;
+                default:
+                    break;
+            }
+            return args[++i];
+        }        
     }
 }

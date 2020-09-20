@@ -49,9 +49,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComparingTest_1.cs" />
+    <Compile Include="CompareTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ComparingTest_2.cs" />
+    <Compile Include="IsMaskCoveredTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

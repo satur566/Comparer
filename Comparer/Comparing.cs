@@ -185,7 +185,7 @@ namespace Comparer
         /// </summary>
         /// <param name="filename">The text file to analyze.</param>
         /// <returns>The detected encoding.</returns>
-        private static Encoding GetEncoding(string filename) //Used this: https://stackoverflow.com/questions/3825390/effective-way-to-find-any-files-encoding
+        private Encoding GetEncoding(string filename) //Used this: https://stackoverflow.com/questions/3825390/effective-way-to-find-any-files-encoding
         {
             // Read the BOM
             var bom = new byte[4];
