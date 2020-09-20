@@ -5,14 +5,22 @@ using System.Text;
 
 namespace Comparer
 {
-    class Comparing
+    public class Comparing
     {
+        private string FirstFilePath { get; set; }
+        private string SecondFilePath { get; set; }
         private int StartIndex { get; set; } = 0;
         public static int EndIndex { get; set; } = 0;
         private List<int> IgnoreIndexes { get; set; } = new List<int>();
-        public Comparing() { }
-        public Comparing(int beginsWith, int endsWith, List<int> ignoreItems)
+        public Comparing(string firstFilePath, string secondFilePath)
         {
+            FirstFilePath = firstFilePath;
+            SecondFilePath = secondFilePath;
+        }
+        public Comparing(string firstFilePath, string secondFilePath, int beginsWith, int endsWith, List<int> ignoreItems)
+        {
+            FirstFilePath = firstFilePath;
+            SecondFilePath = secondFilePath;
             StartIndex = beginsWith;
             EndIndex = endsWith;
             IgnoreIndexes = new List<int>(ignoreItems);
@@ -57,8 +65,8 @@ namespace Comparer
         /// <returns>Возвращает -1 в случае, если различий не обнаружено. В противном случае возвращает номер строки, на которой обнаружилось первое отличие.</returns>
         public int Compare(out string firstUnmatchedValue, out string secondUnmatchedValue)
         {
-            string firstPath = Configs.ResultPath;
-            string secondPath = Configs.ReferencePath;
+            string firstPath = FirstFilePath;
+            string secondPath = SecondFilePath;
             int discrepancyIndex = -1;
             string unmatchedResultString = "";
             string unmatchedReferenceString = "";
@@ -128,7 +136,7 @@ namespace Comparer
         /// <param name="firstValue">Строковое значение.</param>
         /// <param name="secondValue">Строковое значение.</param>
         /// <returns>Возвращает true, если строки совпадают с учетом маски. В противном случае - false.</returns>
-        private static bool IsMaskCovered(string firstValue, string secondValue)
+        private bool IsMaskCovered(string firstValue, string secondValue)
         {
             if (firstValue.Equals("*") || secondValue.Equals("*"))
             {

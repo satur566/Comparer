@@ -32,7 +32,7 @@ namespace Comparer
                     {
                         Configs.ResultPath = args[0];
                         Configs.ReferencePath = args[1];
-                        Comparing defaultComparer = new Comparing();
+                        Comparing defaultComparer = new Comparing(Configs.ResultPath, Configs.ReferencePath);
                         discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
                     }
                     else
@@ -40,7 +40,7 @@ namespace Comparer
                         Configs.ResultPath = args[0];
                         Configs.ReferencePath = args[1];
                         ReadArgs(args);
-                        Comparing argsComparer = new Comparing(Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());
+                        Comparing argsComparer = new Comparing(Configs.ResultPath, Configs.ReferencePath, Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());
                         discrepancyIndex = argsComparer.Compare(out firstValue, out secondValue);
                     }
                     if (discrepancyIndex > 0)
