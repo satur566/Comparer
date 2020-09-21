@@ -68,8 +68,8 @@ namespace Comparer
             string firstPath = FirstFilePath;
             string secondPath = SecondFilePath;
             int discrepancyIndex = -1;
-            string unmatchedResultString = "";
-            string unmatchedReferenceString = "";
+            string unmatchedResultString = null;
+            string unmatchedReferenceString = null;
             int shortestLength = ShortestLength(firstPath, secondPath);
             EndIndex = EndIndex != 0 && shortestLength > EndIndex ? EndIndex : shortestLength;
             if (StartIndex > EndIndex)
@@ -121,8 +121,8 @@ namespace Comparer
             }
             if (discrepancyIndex.Equals(-1))
             {
-                firstUnmatchedValue = "";
-                secondUnmatchedValue = "";
+                firstUnmatchedValue = null;
+                secondUnmatchedValue = null;
                 return discrepancyIndex;
             }
             firstUnmatchedValue = unmatchedResultString;
@@ -151,8 +151,8 @@ namespace Comparer
                 string secondValueTail = secondValue.Substring(secondValue.LastIndexOf("*") + 1);
                 string shortestHead = firstValueHead.Length > secondValueHead.Length ? secondValueHead : firstValueHead;
                 string shortestTail = firstValueTail.Length > secondValueTail.Length ? secondValueTail : firstValueTail;
-                string longestHead = firstValueHead.Length < secondValueHead.Length ? secondValueHead : firstValueHead;
-                string longestTail = firstValueTail.Length < secondValueTail.Length ? secondValueTail : firstValueTail;
+                string longestHead = firstValueHead.Equals(shortestHead) ? secondValueHead : firstValueHead;
+                string longestTail = firstValueTail.Equals(shortestTail) ? secondValueTail : firstValueTail;
                 if (longestHead.Contains(shortestHead) && longestTail.Contains(shortestTail))
                 {
                     condition = true;

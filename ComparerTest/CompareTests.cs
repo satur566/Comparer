@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ComparerTest
 {
     [TestClass]
-    public class CompareTest //TODO: more test for the GOD OF TESTS!
+    public class CompareTests //TODO: more test for the GOD OF TESTS!
     {
         /// <summary>
         /// Проводит тестирование метода int Compare(out string firstUnmatchedValue, out string secondUnmatchedValue).
@@ -71,12 +71,12 @@ namespace ComparerTest
         [TestMethod]
         public void OneLineFullMasked()
         {
-            TestBody(-1, "sample1.txt", "sample4.txt", "", "");
+            TestBody(-1, "sample1.txt", "sample4.txt", null, null);
         }
         [TestMethod]
         public void OneLinePartialMaskedMatching()
         {
-            TestBody(-1, "sample1.txt", "sample5.txt", "", "");
+            TestBody(-1, "sample1.txt", "sample5.txt", null, null);
         }
         [TestMethod]
         public void OneLinePartialMaskedUnmatching()
@@ -86,7 +86,7 @@ namespace ComparerTest
         [TestMethod]
         public void DifferentEncodingMatchingContent()
         {
-            TestBody(-1, "sample1.txt", "sample7.file", "", "");
+            TestBody(-1, "sample1.txt", "sample7.file", null, null);
         }
     }
 }
