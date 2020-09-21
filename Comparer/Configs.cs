@@ -4,10 +4,11 @@ using System.IO;
 
 namespace Comparer
 {
-    static class Configs
+    public static class Configs
     {
         private static string resultPath = "";
         private static string referencePath = "";
+        private static int startIndex = 0;
         private static List<int> ignoreIndexes = new List<int>();
         public static bool IsDetailed { get; set; } = false;
         public static string ResultPath 
@@ -31,7 +32,17 @@ namespace Comparer
                 referencePath = CheckFileAvailability(value);
             }
         }
-        public static int StartIndex { get; set; } = 0;
+        public static int StartIndex
+        {
+            get
+            {
+                return startIndex;
+            }
+            set
+            {
+                startIndex = --value;
+            }
+        } //TODO: return --value
         public static int EndIndex { get; set; } = 0;
         public static List<int> GetIgnoreIndexes()
         {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Comparer
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -135,6 +135,10 @@ namespace Comparer
                     if (!int.TryParse(args[i + 1], out _))
                     {
                         throw new Exception($"{args[i]}: номер строки должен быть числом.");
+                    }
+                    if (args[i + 1].Equals(0))
+                    {
+                        throw new Exception($"{args[i]}: порядковый номер строки не может быть равен 0");
                     }
                     break;
                 case "-ignore":
