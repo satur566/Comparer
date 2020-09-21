@@ -27,37 +27,6 @@ namespace Comparer
         }
 
         /// <summary>
-        /// Определяет наиболее короткий по количеству строк файл.
-        /// </summary>
-        /// <param name="firstPath">Путь к файлу.</param>
-        /// <param name="secondPath">Путь к файлу.</param>
-        /// <returns>Возвращает количество строк наиболее короткого файла.</returns>
-        private int ShortestLength (string firstPath, string secondPath)
-        {
-            int count = 0;
-            try
-            {
-                using (StreamReader firstStream = new StreamReader(firstPath))
-                using (StreamReader secondStream = new StreamReader(secondPath))
-                {
-                    while (true)
-                    {
-                        if (firstStream.ReadLine() == null || secondStream.ReadLine() == null)
-                        {
-                            break;
-                        }
-                        count++;
-                    }
-                }
-            }
-            catch
-            {
-                throw new Exception("Невозможно сравнить файлы. Процесс чтения был прерван.");
-            }
-            return count;
-        }
-
-        /// <summary>
         /// Сравнивает два файла между собой до первого различия.
         /// </summary>
         /// <param name="firstUnmatchedValue">Строка из первого файла с отличием.</param>
@@ -65,13 +34,11 @@ namespace Comparer
         /// <returns>Возвращает -1 в случае, если различий не обнаружено. В противном случае возвращает номер строки, на которой обнаружилось первое отличие.</returns>
         public int Compare(out string firstUnmatchedValue, out string secondUnmatchedValue)
         {
+            firstUnmatchedValue = null;
+            secondUnmatchedValue = null;
             string firstPath = FirstFilePath;
             string secondPath = SecondFilePath;
             int discrepancyIndex = -1;
-            string unmatchedResultString = null;
-            string unmatchedReferenceString = null;
-            int shortestLength = ShortestLength(firstPath, secondPath);
-            EndIndex = EndIndex != 0 && shortestLength > EndIndex ? EndIndex : shortestLength;
             if (StartIndex > EndIndex)
             {
                 throw new Exception("Значение нижней границы диапазона поиска больше значения верхней границы диапазона поиска.");
@@ -81,52 +48,51 @@ namespace Comparer
                 using (StreamReader firstStream = new StreamReader(firstPath, Encoding.ASCII))
                 using (StreamReader secondStream = new StreamReader(secondPath, Encoding.ASCII))
                 {
-                    for (int i = 0; i < EndIndex; i++)
+                    int i = 0;
+                    string resultString = "";
+                    string referenceString = "";
+                    while (true)
                     {
-                        string resultString = firstStream.ReadLine();                        
-                        string referenceString = secondStream.ReadLine();
+                        resultString = firstStream.ReadLine();                        
+                        referenceString = secondStream.ReadLine();
                         if (i < StartIndex || IgnoreIndexes.Contains(i))
                         {
+                            i++;
                             continue;
                         }
-                        if (!resultString.Equals(referenceString))
+                        if ((resultString != null && referenceString == null) ||
+                            (resultString == null && referenceString != null))
                         {
-                            if (IsMaskCovered(resultString, referenceString))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                discrepancyIndex = i;
-                                firstUnmatchedValue = resultString;
-                                secondUnmatchedValue = referenceString;
-                                return discrepancyIndex;
-                            }
+                            firstUnmatchedValue = resultString;
+                            secondUnmatchedValue = referenceString;
+                            discrepancyIndex = i;
+                            break;
                         }
-                    }
-                    if (EndIndex == shortestLength)
-                    {
-                        unmatchedResultString = firstStream.ReadLine();
-                        unmatchedReferenceString = secondStream.ReadLine();
-                        if (unmatchedResultString != null || unmatchedReferenceString != null)
+                        if ((EndIndex != 0 && i == EndIndex) ||
+                            (resultString == null && referenceString == null))
                         {
-                            discrepancyIndex = EndIndex;
+                            break;
+                        }                        
+                        if (!resultString.Equals(referenceString) &&
+                            !IsMaskCovered(resultString, referenceString))
+                        {
+                            discrepancyIndex = i;
+                            firstUnmatchedValue = resultString;
+                            secondUnmatchedValue = referenceString;
+                            break;
                         }
-                    }                            
+                        else
+                        {
+                            i++;
+                            continue;
+                        }                        
+                    }                    
                 }
             }
             catch
             {
                 throw new Exception("Невозможно сравнить файлы. Процесс чтения был прерван.");
             }
-            if (discrepancyIndex.Equals(-1))
-            {
-                firstUnmatchedValue = null;
-                secondUnmatchedValue = null;
-                return discrepancyIndex;
-            }
-            firstUnmatchedValue = unmatchedResultString;
-            secondUnmatchedValue = unmatchedReferenceString;
             return discrepancyIndex;
         }
 
@@ -153,10 +119,7 @@ namespace Comparer
                 string shortestTail = firstValueTail.Length > secondValueTail.Length ? secondValueTail : firstValueTail;
                 string longestHead = firstValueHead.Equals(shortestHead) ? secondValueHead : firstValueHead;
                 string longestTail = firstValueTail.Equals(shortestTail) ? secondValueTail : firstValueTail;
-                if (longestHead.Contains(shortestHead) && longestTail.Contains(shortestTail))
-                {
-                    condition = true;
-                }
+                condition = longestHead.Contains(shortestHead) && longestTail.Contains(shortestTail);
             }
             else if (firstValue.Contains("*") || secondValue.Contains("*")) //REGEX!!!!!!! I dont know regex, but I made it myself and it's works fine!
             {

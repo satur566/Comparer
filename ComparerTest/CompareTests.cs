@@ -114,7 +114,6 @@ namespace ComparerTest
             TestBody(-1, "sample1.txt", "sample6.cfg", 0, 100, new int[] { 6 }, null, null);
         }
         [TestMethod]
-        [ExpectedException(typeof(Exception), "Значение нижней границы диапазона поиска больше значения верхней границы диапазона поиска.")]
         public void BeginIndexHigherThanFileLength()
         {
             TestBody(-1, "sample1.txt", "sample2.txt", 100, 101, new int[] {}, null, null);
