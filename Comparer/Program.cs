@@ -3,12 +3,13 @@ using System.Diagnostics;
 
 namespace Comparer
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             Stopwatch globalStopwatch = new Stopwatch();
             globalStopwatch.Start();
+            bool isDetailed = false;
             try
             {
                 if (args.Equals(null) || args.Length <= 1)
@@ -27,22 +28,17 @@ namespace Comparer
                 {
                     string firstValue = "";
                     string secondValue = "";
-                    int discrepancyIndex = -1;
-                    if (args.Length == 2)
+                    int discrepancyIndex = -1;                    
+                    Comparing defaultComparer = new Comparing();
+                    defaultComparer.ResultPath = args[0];
+                    defaultComparer.ReferencePath = args[1];
+                    if (args.Length > 2)
                     {
-                        Configs.ResultPath = args[0];
-                        Configs.ReferencePath = args[1];
-                        Comparing defaultComparer = new Comparing();
-                        discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
+                        defaultComparer.StartIndex = Convert.ToInt32(ArgumentTaker(args, "-begin"));
+                        defaultComparer.EndIndex = Convert.ToInt32(ArgumentTaker(args, "-end"));
+                        defaultComparer.SetIgnoreIndexes(ArgumentTaker(args, "-ignore"));
                     }
-                    else
-                    {
-                        Configs.ResultPath = args[0];
-                        Configs.ReferencePath = args[1];
-                        ReadArgs(args);
-                        Comparing argsComparer = new Comparing(Configs.StartIndex, Configs.EndIndex, Configs.GetIgnoreIndexes());
-                        discrepancyIndex = argsComparer.Compare(out firstValue, out secondValue);
-                    }
+                    discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
                     if (discrepancyIndex > 0)
                     {
                         Console.WriteLine($"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +
@@ -61,7 +57,7 @@ namespace Comparer
             finally
             {
                 globalStopwatch.Stop();
-                if (Configs.IsDetailed)
+                if (isDetailed)
                 {
                     Console.WriteLine($"Потрачено времени (миллисекунд) всего: {globalStopwatch.ElapsedMilliseconds}.");
                 }
@@ -91,60 +87,37 @@ namespace Comparer
         /// <param name="args">Массив аргументов.</param>
         /// <param name="i">Индекс массива.</param>
         /// <returns>Возвращает значение аргумента.</returns>
-        private static string ArgumentTaker(ref string[] args, ref int i)
+        private static string ArgumentTaker(string[] args, string parameter)
         {
-            if (i + 1 >= args.Length)
+            for (int i = 0; i < args.Length; i++)
             {
-                throw new Exception($"Отсутствуют аргументы параметра {args[i]}.");
-            }
-            switch (args[i])
-            {
-                case "-begin":
-                case "-end":
-                    if (!int.TryParse(args[i + 1], out _))
-                    {
-                        throw new Exception($"{args[i]}: номер строки должен быть числом.");
-                    }
-                    break;
-                case "-ignore":
-                    args[i + 1] = args[i + 1].Replace(" ", "");
-                    args[i + 1] = args[i + 1].Trim(',');
-                    break;
-                default:
-                    break;
-            }
-            return args[++i];
-        }
-
-        /// <summary>
-        /// Считывает аргументы, подаваемые на вход приложению.
-        /// </summary>
-        /// <param name="args">Массив аргуиентов.</param>
-        private static void ReadArgs(string[] args)
-        {
-            for (int i = 2; i < args.Length; i++)
-            {
-                switch (args[i])
+                if (args[i].Equals(parameter))
                 {
-                    case "-begin":
-                        Configs.StartIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
-                        break;
-                    case "-verbose":
-                        Configs.IsDetailed = true;
-                        break;
-                    case "-end":
-                        Configs.EndIndex = Convert.ToInt32(ArgumentTaker(ref args, ref i));
-                        break;
-                    case "-help":
-                        ShowHelp();
-                        break;
-                    case "-ignore":
-                        Configs.SetIgnoreIndexes(ArgumentTaker(ref args, ref i));
-                        break;
-                    default:
-                        throw new Exception($"Неизвестный параметр: {args[i]}");
+                    switch (args[i])
+                    {
+                        case "-begin":
+                        case "-end":
+                            if (!int.TryParse(args[i + 1], out _))
+                            {
+                                throw new Exception($"{args[i]}: номер строки должен быть числом.");
+                            }
+                            if (args[i + 1].Equals(0))
+                            {
+                                throw new Exception($"{args[i]}: порядковый номер строки не может быть равен 0");
+                            }
+                            return args[i + 1];
+                        case "-ignore":
+                            string value  = args[i + 1].Replace(" ", "");
+                            value = value.Trim(',');
+                            return value;
+                        case "-verbose":
+                            return "true";
+                        default:
+                            throw new Exception($"Неизвестный параметр: {args[i]}");
+                    }
                 }
             }
-        }
+            return "";
+        }        
     }
 }

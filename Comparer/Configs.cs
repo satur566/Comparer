@@ -4,13 +4,13 @@ using System.IO;
 
 namespace Comparer
 {
-    static class Configs
+    public class Configs
     {
-        private static string resultPath = "";
-        private static string referencePath = "";
-        private static List<int> ignoreIndexes = new List<int>();
-        public static bool IsDetailed { get; set; } = false;
-        public static string ResultPath 
+        private string resultPath = "";
+        private string referencePath = "";
+        private int startIndex = 0;
+        private List<int> ignoreIndexes = new List<int>();
+        public string ResultPath 
         {
             get
             {
@@ -21,7 +21,7 @@ namespace Comparer
                 resultPath = CheckFileAvailability(value);
             }
         }
-        public static string ReferencePath {
+        public string ReferencePath {
             get
             {
                 return referencePath;
@@ -31,15 +31,25 @@ namespace Comparer
                 referencePath = CheckFileAvailability(value);
             }
         }
-        public static int StartIndex { get; set; } = 0;
-        public static int EndIndex { get; set; } = 0;
-        public static List<int> GetIgnoreIndexes()
+        public int StartIndex
+        {
+            get
+            {
+                return startIndex;
+            }
+            set
+            {
+                startIndex = --value;
+            }
+        } //TODO: return --value
+        public int EndIndex { get; set; } = 0;
+        public List<int> GetIgnoreIndexes()
         {
             return ignoreIndexes;
         }
-        public static void SetIgnoreIndexes(string value)
+        public void SetIgnoreIndexes(string value)
         {
-            string[] tempArray = value.Split(',');
+            string[] tempArray = value.Split(',');           
             List<int> tempList = new List<int>();
             for (int i = 0; i < tempArray.Length; i++)            
             {
@@ -57,7 +67,7 @@ namespace Comparer
         /// </summary>
         /// <param name="filename">Полное имя файла.</param>
         /// <returns>Возвращает true, если файл заблокирован другим процессом. В противном случае возвращает false.</returns>
-        private static bool IsFileLocked(string filename)
+        private bool IsFileLocked(string filename)
         {
             bool Locked = false;
             try
@@ -77,7 +87,7 @@ namespace Comparer
         /// Проверяет доступность и наличие файла.
         /// </summary>
         /// <param name="path">Полное имя файла.</param>
-        private static string CheckFileAvailability(string path)
+        private string CheckFileAvailability(string path)
         {
             if (!File.Exists(path))
             {

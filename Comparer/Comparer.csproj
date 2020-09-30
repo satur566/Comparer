@@ -49,16 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="test files\sample6.cfg" />
-    <None Include="test files\sample7.file" />
-    <None Include="test files\sample8.log" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="test files\sample1.txt" />
-    <Content Include="test files\sample2.txt" />
-    <Content Include="test files\sample3.txt" />
-    <Content Include="test files\sample4.txt" />
-    <Content Include="test files\sample5.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
