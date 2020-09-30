@@ -26,19 +26,19 @@ namespace Comparer
                 }
                 else
                 {
-                    string firstValue = "";
-                    string secondValue = "";
-                    int discrepancyIndex = -1;                    
-                    Comparing defaultComparer = new Comparing();
-                    defaultComparer.ResultPath = args[0];
-                    defaultComparer.ReferencePath = args[1];
+                    int discrepancyIndex = -1;
+                    Comparing defaultComparer = new Comparing
+                    {
+                        ResultPath = args[0],
+                        ReferencePath = args[1]
+                    };
                     if (args.Length > 2)
                     {
                         defaultComparer.StartIndex = Convert.ToInt32(ArgumentTaker(args, "-begin"));
                         defaultComparer.EndIndex = Convert.ToInt32(ArgumentTaker(args, "-end"));
                         defaultComparer.SetIgnoreIndexes(ArgumentTaker(args, "-ignore"));
                     }
-                    discrepancyIndex = defaultComparer.Compare(out firstValue, out secondValue);
+                    discrepancyIndex = defaultComparer.Compare(out string firstValue, out string secondValue);
                     if (discrepancyIndex > 0)
                     {
                         Console.WriteLine($"Первое различие встретилось на {discrepancyIndex + 1} строке:\n" +

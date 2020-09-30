@@ -18,8 +18,8 @@ namespace Comparer
         {
             firstUnmatchedValue = null;
             secondUnmatchedValue = null;
-            string firstPath = ResultPath;
-            string secondPath = ReferencePath;
+            string firstPath = CheckFileAvailability(ResultPath);
+            string secondPath = CheckFileAvailability(ReferencePath);
             int discrepancyIndex = -1;
             if (StartIndex > EndIndex)
             {
@@ -122,6 +122,44 @@ namespace Comparer
                 condition = maskedValue.Equals(unmaskedValue);
             }
             return condition;
+        }
+
+        /// <summary>
+        /// Проверяет использование файла другим процессом.
+        /// </summary>
+        /// <param name="filename">Полное имя файла.</param>
+        /// <returns>Возвращает true, если файл заблокирован другим процессом. В противном случае возвращает false.</returns>
+        private bool IsFileLocked(string filename)
+        {
+            bool Locked = false;
+            try
+            {
+                FileStream fs =
+                    File.Open(filename, FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite, FileShare.None);
+                fs.Close();
+            }
+            catch
+            {
+                Locked = true;
+            }
+            return Locked;
+        }
+        /// <summary>
+        /// Проверяет доступность и наличие файла.
+        /// </summary>
+        /// <param name="path">Полное имя файла.</param>
+        private string CheckFileAvailability(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new Exception($"Файл {path} не сушествует.");
+            }
+            else if (IsFileLocked(path))
+            {
+                throw new Exception($"Файл {path} занят другим процессом.");
+            }
+            return path;
         }
     }
 }

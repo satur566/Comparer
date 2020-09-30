@@ -26,11 +26,13 @@ namespace ComparerTest
             string testFilesFolder = Path.Combine(Environment.CurrentDirectory.Replace("\\bin\\Debug", ""), @"test files");
             string firstTestFile = Path.Combine(testFilesFolder, firstFileName);
             string secondTestFile = Path.Combine(testFilesFolder, secondFileName);
-            Comparing compare = new Comparing();
-            compare.ResultPath = firstTestFile;
-            compare.ReferencePath = secondTestFile;
-            compare.StartIndex = beginIndex;
-            compare.EndIndex = endIndex;
+            Comparing compare = new Comparing
+            {
+                ResultPath = firstTestFile,
+                ReferencePath = secondTestFile,
+                StartIndex = beginIndex,
+                EndIndex = endIndex
+            };
             compare.SetIgnoreIndexes(ignoreList);
             //Act
             int actualValue = compare.Compare(out string actualFirstLine, out string actalSecondLine);
