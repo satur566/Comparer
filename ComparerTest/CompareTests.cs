@@ -23,7 +23,9 @@ namespace ComparerTest
             string testFilesFolder = Path.Combine(Environment.CurrentDirectory.Replace("\\bin\\Debug", ""), @"test files");
             string firstTestFile = Path.Combine(testFilesFolder, firstFileName);
             string secondTestFile = Path.Combine(testFilesFolder, secondFileName);
-            Comparing compare = new Comparing(firstTestFile, secondTestFile);
+            Comparing compare = new Comparing();
+            compare.ResultPath = firstTestFile;
+            compare.ReferencePath = secondTestFile;
             //Act
             int actualValue = compare.Compare(out string actualFirstLine, out string actualSecondLine);
             //Assert
@@ -43,13 +45,21 @@ namespace ComparerTest
         /// <param name="array">Номера строк, которые необходимо пропустить при проверке.</param>
         /// <param name="expectedFirstLine">Ожидаемое возвращаемое значение отличающейся строки результирующего файла.</param>
         /// <param name="expectedSecondLine">Ожидаемое возвращаемое значение отличающейся строки эталонного файла.</param>
-        private void TestBody(int expectedValue, string firstFileName, string secondFileName, int beginIndex, int endIndex, int[] ignoreList, string expectedFirstLine, string expectedSecondLine)
+        private void TestBody(int expectedValue, string firstFileName, string secondFileName, int beginIndex, int endIndex, string ignoreList, string expectedFirstLine, string expectedSecondLine)
         {
             //Arrange
             string testFilesFolder = Path.Combine(Environment.CurrentDirectory.Replace("\\bin\\Debug", ""), @"test files");
             string firstTestFile = Path.Combine(testFilesFolder, firstFileName);
             string secondTestFile = Path.Combine(testFilesFolder, secondFileName);
-            Comparing compare = new Comparing(firstTestFile, secondTestFile, beginIndex, endIndex, new List<int>(ignoreList));
+            Comparing compare = new Comparing();
+            compare.ResultPath = firstTestFile;
+            compare.ReferencePath = secondTestFile;
+            compare.StartIndex = beginIndex;
+            compare.EndIndex = endIndex;
+            if (!string.IsNullOrEmpty(ignoreList))
+            {
+                compare.SetIgnoreIndexes(ignoreList);
+            }
             //Act
             int actualValue = compare.Compare(out string actualFirstLine, out string actalSecondLine);
             //Assert
@@ -91,38 +101,38 @@ namespace ComparerTest
         [TestMethod]
         public void LinesCountDifference_Unmatching_EndIndexIsSet_Matching()
         {
-            TestBody(-1, "sample1.txt", "sample2.txt", 0, 8, new int[] { 100 }, null, null);
+            TestBody(-1, "sample1.txt", "sample2.txt", 0, 8, "100", null, null);
         }
         [TestMethod]
         public void LinesCountDifference_Unmatching_EndIndexIsSet_Unmatching()
         {
-            TestBody(9, "sample1.txt", "sample2.txt", 0, 9, new int[] { 100 }, null, "1");
+            TestBody(9, "sample1.txt", "sample2.txt", 0, 9, "100", null, "1");
         }
         [TestMethod]
         public void EndIndexIsOutOfLinesCount()
         {
-            TestBody(-1, "sample1.txt", "sample7.file", 0, 99, new int[] { 100 }, null, null);
+            TestBody(-1, "sample1.txt", "sample7.file", 0, 99, "100", null, null);
         }
         [TestMethod]
         public void BeginIndexPastUnmatching_Matching()
         {
-            TestBody(-1, "sample1.txt", "sample6.cfg", 7, 99, new int[] { 100 }, null, null);
+            TestBody(-1, "sample1.txt", "sample6.cfg", 8, 99, "100", null, null);
         }
         [TestMethod]
         public void IgnoreArrayTest()
         {
-            TestBody(-1, "sample1.txt", "sample6.cfg", 0, 100, new int[] { 6 }, null, null);
+            TestBody(-1, "sample1.txt", "sample6.cfg", 0, 100, "7", null, null);
         }
         [TestMethod]
         public void BeginIndexHigherThanFileLength()
         {
-            TestBody(-1, "sample1.txt", "sample2.txt", 100, 101, new int[] {}, null, null);
+            TestBody(-1, "sample1.txt", "sample2.txt", 100, 101, "", null, null);
         }
         [TestMethod]
         [ExpectedException(typeof(Exception), "Значение нижней границы диапазона поиска больше значения верхней границы диапазона поиска.")]
         public void BeginIndexHigherThanEndIndex()
         {
-            TestBody(-1, "sample1.txt", "sample2.txt", 100, 5, new int[] { }, null, null);
+            TestBody(-1, "sample1.txt", "sample2.txt", 100, 5, "", null, null);
         }
     }
 }

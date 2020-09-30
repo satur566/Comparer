@@ -1,30 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace Comparer
 {
-    public class Comparing
+    public class Comparing: Configs
     {
-        private string FirstFilePath { get; set; }
-        private string SecondFilePath { get; set; }
-        private int StartIndex { get; set; } = 0;
-        public static int EndIndex { get; set; } = 0;
-        private List<int> IgnoreIndexes { get; set; } = new List<int>();
-        public Comparing(string firstFilePath, string secondFilePath)
-        {
-            FirstFilePath = firstFilePath;
-            SecondFilePath = secondFilePath;
-        }
-        public Comparing(string firstFilePath, string secondFilePath, int beginsWith, int endsWith, List<int> ignoreItems)
-        {
-            FirstFilePath = firstFilePath;
-            SecondFilePath = secondFilePath;
-            StartIndex = beginsWith;
-            EndIndex = endsWith;
-            IgnoreIndexes = new List<int>(ignoreItems);
-        }
+        public Comparing() { }
 
         /// <summary>
         /// Сравнивает два файла между собой до первого различия.
@@ -36,8 +18,8 @@ namespace Comparer
         {
             firstUnmatchedValue = null;
             secondUnmatchedValue = null;
-            string firstPath = FirstFilePath;
-            string secondPath = SecondFilePath;
+            string firstPath = ResultPath;
+            string secondPath = ReferencePath;
             int discrepancyIndex = -1;
             if (StartIndex > EndIndex)
             {
@@ -55,7 +37,7 @@ namespace Comparer
                     {
                         resultString = firstStream.ReadLine();                        
                         referenceString = secondStream.ReadLine();
-                        if (i < StartIndex || IgnoreIndexes.Contains(i))
+                        if (i < StartIndex || GetIgnoreIndexes().Contains(i))
                         {
                             i++;
                             continue;
